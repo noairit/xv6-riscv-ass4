@@ -180,3 +180,53 @@ filewrite(struct file *f, uint64 addr, int n)
   return ret;
 }
 
+
+int fileseek (struct file *f, int offset, int whence){
+
+  if(f->type == FD_INODE){
+    if(whence == 0){
+      ilock(f->ip);
+      if(offset < 0){
+        f->off = 0;
+        iunlock(f->ip);
+        return 0;
+      }
+      if(offset > f->ip->size){
+        f->off = f->ip->size;
+        iunlock(f->ip);
+        return 0;
+      }
+      f->off = offset;
+      iunlock(f->ip);
+      return 0;
+    }
+
+    if(whence == 1){
+      ilock(f->ip);
+      int a = f->off + offset;
+      if(a < 0){
+        f->off = 0;
+        iunlock(f->ip);
+        return 0;
+      } 
+
+      if(a > f->ip->size){
+        f->off = f->ip->size;
+        iunlock(f->ip);
+        return 0;
+      }
+
+      f->off = f->off + offset;
+      iunlock(f->ip);
+      return 0; 
+    }
+    return -1;
+
+
+
+  }
+  else
+    return -1;
+
+  
+}
